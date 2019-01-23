@@ -16,40 +16,65 @@
 #
 ##############################################################################
 
-from openerp import api, fields, models
+from odoo import api, fields, models
 
 
 class ProductAttribute(models.Model):
     _inherit = "product.attribute"
 
-    attr_type = fields.Selection(required=True, selection=[
-        ('select', 'Select'),
-        ('range', 'Range'),
-        ('numeric', 'Numeric')], string="Type", default='select')
+    is_numeric = fields.Boolean('is_numeric')
 
 
-class ProductAttributeLine(models.Model):
-    _inherit = "product.attribute.line"
-
-    required = fields.Boolean('Required')
-    default = fields.Many2one('product.attribute.value', 'Default')
-    attr_type = fields.Selection(string='Type', store=False,
-                                 related='attribute_id.attr_type')
 
 
 class ProductAttributeValue(models.Model):
     _inherit = "product.attribute.value"
 
-    attr_type = fields.Selection(string='Type',
-                                 related='attribute_id.attr_type')
-    numeric_value = fields.Float('Numeric Value', digits=(12, 6))
-    min_range = fields.Float('Min', digits=(12, 6))
-    max_range = fields.Float('Max', digits=(12, 6))
-
+    is_numeric = fields.Boolean('is_numeric',
+                                 related='attribute_id.is_numeric')
+    numeric_value = fields.Float('Numeric Value')
+    attribute_code = fields.Char('Attribute Code')
+    
     @api.onchange('name')
     def onchange_name(self):
-        if self.attr_type == 'numeric' and not self.numeric_value:
+        if self.is_numeric:
             try:
-                self.numeric_value = float(self.name)
+                self.numeric_value = float((''.join([c for c in self.name if c in '1234567890,.'])).replace(',', '.'))
+                self.attribute_code = (''.join([c for c in self.name if c in '1234567890,.'])).replace(',', '').replace('.', '')
             except Exception:
                 pass
+
+
+
+
+
+    @api.one
+    def write(self, vals):
+        if vals.get('name',False):
+            if  self.is_numeric:
+                if vals.get('numeric_value',0.0) == 0.0 or self.numeric_value == 0.00:
+                    try:
+                        vals['numeric_value'] = float((''.join([c for c in vals.get('name','') if c in '1234567890,.'])).replace(',', '.'))
+                    except Exception:
+                        pass
+        return super(ProductAttributeValue, self).write(vals)
+
+    @api.model
+    def create(self, vals):
+        create_vals = super(ProductAttributeValue, self).create(vals)
+        if vals.get('name',False):
+            if create_vals['is_numeric']:
+                if create_vals['numeric_value'] == 0.0:
+                    try:
+                        create_vals['numeric_value'] = float((''.join([c for c in vals.get('name','') if c in '1234567890,.'])).replace(',', '.'))
+                    except Exception:
+                        pass
+
+                if create_vals['numeric_value'] != 0.0:
+                    try:
+                        create_vals['attribute_code'] = (''.join([c for c in vals.get('name','') if c in '1234567890,.'])).\
+                            replace(',','').replace('.', '')
+                    except Exception:
+                        pass
+
+        return create_vals

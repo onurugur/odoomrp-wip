@@ -1,19 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<openerp>
+<odoo>
     <data>
-        <record model="ir.ui.view" id="varitants_extend_form_view">
-            <field name="name">product.template.variants.extended</field>
-            <field name="model">product.template</field>
-            <field name="inherit_id" ref="product.product_template_only_form_view" />
-            <field name="arch" type="xml">
-                <field name="attribute_id" position="after">
-                    <field name="required" />
-                </field>
-                <field name="value_ids" position="after">
-                    <field name="attr_type" invisible="1" />
-                </field>
-            </field>
-        </record>
 
         <record model="ir.ui.view"
             id="product_attribute_extended_tree_view">
@@ -22,7 +9,7 @@
             <field name="inherit_id" ref="product.attribute_tree_view" />
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                    <field name="attr_type" />
+                    <field name="is_numeric" />
                 </field>
             </field>
         </record>
@@ -34,30 +21,39 @@
             <field name="inherit_id" ref="product.variants_tree_view" />
             <field name="arch" type="xml">
                 <field name="attribute_id" position="after">
-                    <field name="attr_type" readonly="1"/>
+                    <field name="is_numeric" readonly="1"/>
                 </field>
                 <field name="name" position="after">
-                    <field name="numeric_value" attrs="{'readonly':[('attr_type','!=','numeric')],'required':[('attr_type','=','numeric')]}" />
-                    <field name="min_range" attrs="{'readonly':[('attr_type','!=','range')],'required':[('attr_type','=','range')]}" />
-                    <field name="max_range" attrs="{'readonly':[('attr_type','!=','range')],'required':[('attr_type','=','range')]}" />
+                    <field name="numeric_value" attrs="{'readonly':[('is_numeric','=',False)],'required':[('is_numeric','=',True)]}" />
                 </field>
             </field>
         </record>
-
+		
+		<record model="ir.ui.view"
+            id="product_attribute_extended_form_view">
+            <field name="name">product.attribute.value.extended.form</field>
+            <field name="model">product.attribute</field>
+            <field name="inherit_id" ref="product.product_attribute_view_form" />
+            <field name="arch" type="xml">
+                <field name="create_variant" position="after">
+                    <field name="is_numeric"/>
+                </field>
+            </field>
+        </record>
         <record model="ir.ui.view" id="product_attribute_value_search_view">
             <field name="name">product.attribute.value.search</field>
             <field name="model">product.attribute.value</field>
             <field name="arch" type="xml">
                 <search string="Variant Values">
                     <field name="attribute_id"/>
-                    <field name="attr_type" />
+                    <field name="is_numeric" />
                     <field name="name"/>
                     <group expand="0" string="Group By">
-                        <filter string="Attribute" domain="" context="{'group_by':'attribute_id'}"/>
-                        <filter string="Attribute Type" domain="" context="{'group_by':'attr_type'}"/>
+                        <filter name="attribute_id" string="Attribute" domain="" context="{'group_by':'attribute_id'}"/>
+                        <filter name="is_numeric" string="Attribute Type" domain="" context="{'group_by':'is_numeric'}"/>
                     </group>
                 </search>
             </field>
         </record>
     </data>
-</openerp>
+</odoo>

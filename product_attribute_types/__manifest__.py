@@ -23,7 +23,9 @@
     "depends": [
         "product",
     ],
-    "author": "OdooMRP team,"
+    "author": "OnurUgur,"
+              "Codequarters,"
+              "OdooMRP team,"
               "AvanzOSC,"
               "Tecnativa,"
               "Serv. Tecnol. Avanzados - Pedro M. Baeza,"
