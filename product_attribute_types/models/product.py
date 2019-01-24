@@ -33,14 +33,11 @@ class ProductAttributeValue(models.Model):
     is_numeric = fields.Boolean('is_numeric',
                                  related='attribute_id.is_numeric')
     numeric_value = fields.Float('Numeric Value')
-    attribute_code = fields.Char('Attribute Code')
-    
     @api.onchange('name')
     def onchange_name(self):
         if self.is_numeric:
             try:
                 self.numeric_value = float((''.join([c for c in self.name if c in '1234567890,.'])).replace(',', '.'))
-                self.attribute_code = (''.join([c for c in self.name if c in '1234567890,.'])).replace(',', '').replace('.', '')
             except Exception:
                 pass
 
@@ -67,13 +64,6 @@ class ProductAttributeValue(models.Model):
                 if create_vals['numeric_value'] == 0.0:
                     try:
                         create_vals['numeric_value'] = float((''.join([c for c in vals.get('name','') if c in '1234567890,.'])).replace(',', '.'))
-                    except Exception:
-                        pass
-
-                if create_vals['numeric_value'] != 0.0:
-                    try:
-                        create_vals['attribute_code'] = (''.join([c for c in vals.get('name','') if c in '1234567890,.'])).\
-                            replace(',','').replace('.', '')
                     except Exception:
                         pass
 
